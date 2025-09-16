@@ -1,0 +1,56 @@
+# 1. Create a new React + Vite app
+npm create vite@latest jarvis-frontend -- --template react
+
+# 2. Move inside the project
+cd jarvis-frontend
+
+# 3. Install dependencies
+npm install
+
+# 4. Replace default App.jsx with Jarvis UI
+cat > src/App.jsx << 'EOF'
+import { useState } from "react";
+
+function App() {
+  const [prompt, setPrompt] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const generateImage = async () => {
+    setLoading(true);
+    setImageUrl("");
+    try {
+      const res = await fetch("https://jarvis-backend-s8n7.onrender.com/generate-3d", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      setImageUrl(data.image_url);
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>⚡ Jarvis Lab ⚡</h1>
+      <input
+        type="text"
+        placeholder="Enter a 3D prompt..."
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+      />
+      <button onClick={generateImage}>Generate</button>
+      {loading && <p>Generating...</p>}
+      {imageUrl && <img src={imageUrl} alt="3D render" width="400" />}
+    </div>
+  );
+}
+
+export default App;
+EOF
+
+# 5. Run the app locally
+npm run dev
